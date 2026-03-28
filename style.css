@@ -1,0 +1,223 @@
+:root{
+  --board-size: 560px;
+  --cell-size: calc(var(--board-size) / 10);
+  --p1: #e74c3c;
+  --p2: #3498db;
+  --cell-a: #f6f3e8;
+  --cell-b: #e8e2d1;
+  --accent: #2ecc71;
+  --muted: #666;
+
+  /* explicit z-index numbers to control stacking reliably */
+  --cells-z: 1;
+  --overlay-z: 2;
+  --labels-z: 4;
+  --tokens-z: 5;
+}
+
+*{box-sizing:border-box}
+body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  margin:0;
+  color:#222;
+  background: linear-gradient(180deg,#fbfbfb 0%, #f0f4f8 100%);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+main{width:100%;max-width:1100px}
+h1{text-align:center;margin:0 0 16px;font-weight:600}
+
+.game{
+  display:grid;
+  grid-template-columns: 1fr 320px;
+  gap:20px;
+  align-items:start;
+  justify-items:center;
+}
+
+.board{
+  width:var(--board-size);
+  height:var(--board-size);
+  display:grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-auto-rows: 1fr;
+  border:6px solid #444;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  background: #fff;
+  position:relative; /* required for SVG overlay */
+  overflow:visible;
+}
+
+/* SVG overlay will be appended inside #board and positioned absolutely */
+/* note: using the correct --overlay-z variable name */
+.board svg.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--overlay-z);
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* cells are positioned but kept at a lower stack level than the overlay */
+.cell{
+  width:100%;
+  height:100%;
+  position:relative;
+  padding:6px;
+  font-size:12px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:4px;
+  z-index: var(--cells-z);
+  background-clip: padding-box;
+}
+
+/* ensure the small cell numbers and tokens render above the overlay */
+.cell .num{
+  position:absolute;
+  top:4px;
+  left:6px;
+  font-weight:700;
+  color:var(--muted);
+  font-size:11px;
+  z-index: var(--labels-z);
+}
+
+.cell:nth-child(odd) { background: var(--cell-a); }
+.cell:nth-child(even){ background: var(--cell-b); }
+
+.cell .tokens{
+  position:absolute;
+  right:6px;
+  bottom:6px;
+  display:flex;
+  gap:6px;
+  align-items:center;
+  z-index: var(--tokens-z);
+}
+
+/* tokens */
+.token{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:2px solid #fff;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  display:inline-block;
+}
+
+.token-p1{ background:var(--p1) }
+.token-p2{ background:var(--p2) }
+
+.controls{
+  width:100%;
+  max-width:320px;
+  padding:14px;
+  background: rgba(255,255,255,0.9);
+  border-radius:10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.players-info{
+  display:flex;
+  gap:8px;
+  flex-direction:column;
+  margin-bottom:14px;
+}
+
+.player{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:8px;
+  border-radius:8px;
+  background:transparent;
+}
+.player.current{ background: linear-gradient(90deg, rgba(46,204,113,0.06), rgba(52,152,219,0.04)); }
+
+.token.token-p1, .token.token-p2{ width:18px;height:18px;border-radius:50% }
+
+/* Hide the visible numeric scores next to player names (you requested this earlier) */
+.players-info .pos {
+  display: none !important;
+}
+
+.dice-area{ display:flex; gap:12px; align-items:center; margin-bottom:12px }
+.dice{
+  width:64px;
+  height:64px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  background:linear-gradient(180deg,#fff,#f6f6f6);
+  border:2px solid #ddd;
+  box-shadow:0 6px 12px rgba(0,0,0,0.06);
+}
+.btn{
+  padding:10px 14px;
+  border-radius:8px;
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+.btn:disabled{ opacity:0.6; cursor:not-allowed }
+.btn-alt{ background:transparent; color:#333; border:1px solid #ddd; margin-top:8px }
+
+.message{ padding:8px 6px; color:#222; font-weight:600; margin-bottom:6px }
+
+.control-actions{ margin-top:8px }
+
+footer{ text-align:center; margin-top:14px; color:var(--muted) }
+
+/* ladder / snake stroke styles - stronger contrast for visibility */
+svg.overlay .ladder-rail{ stroke: rgba(46,204,113,0.98); stroke-width:8; stroke-linecap:round; fill:none; }
+svg.overlay .ladder-rung{ stroke: rgba(46,204,113,0.98); stroke-width:5; stroke-linecap:round; }
+svg.overlay .snake{ stroke: rgba(231,76,60,0.98); stroke-width:8; stroke-linecap:round; stroke-linejoin:round; fill:none; opacity:0.98; }
+svg.overlay .snake-head{ fill: rgba(231,76,60,0.98); stroke: rgba(231,76,60,0.98); stroke-width:1; }
+
+/* overlay menu (start menu and end menu) */
+.overlay-menu{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(0,0,0,0.45);
+  z-index: 9999;
+}
+.menu-panel, .end-panel{
+  width:320px;
+  background:#fff;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 12px 36px rgba(0,0,0,0.28);
+  text-align:center;
+}
+.menu-panel h2, .end-panel h2{ margin:0 0 8px }
+.menu-panel p.menu-desc, .end-panel p.menu-desc{ margin:0 0 16px; color:var(--muted) }
+.menu-buttons{ display:flex; gap:10px; justify-content:center; }
+.menu-buttons .btn{ flex:1 }
+
+/* highlight winner text */
+.end-winner{ font-size:20px; margin-bottom:6px; color: #222; font-weight:700; }
+
+/* small transitions */
+.cell .tokens .token{ transform:translateY(0); transition:transform .18s ease }
+
+@media (max-width:700px){
+  .game{ grid-template-columns: 1fr; justify-items:center }
+  .controls{ max-width:100% }
+  .menu-panel{ width:90%; }
+  .end-panel{ width:90%; }
+}
